@@ -18,7 +18,8 @@ def paint(e):
 
 if __name__ == '__main__':
     Miasta = []
-    Kreski = []
+    Macierz = []
+    Graf = []
 
         #Macierz incydencji lub inna, zadanie jako roziwązanie grafu
     class miasto:
@@ -39,20 +40,29 @@ if __name__ == '__main__':
 
     def WyczyscMacierz():
         Macierz.delete(*Macierz.get_children())
+        Graf.clear()
+
 
     def DodajMiasto(e):
-        if len(Miasta)<15:Miasta.append(miasto(e.x,e.y))
+        if len(Miasta)<15:
+            Miasta.append(miasto(e.x,e.y))
 
         LiczbaMiast = ListaMiast.size()
         if LiczbaMiast<15:
+
             Plotno.create_oval(e.x-6,e.y-6,e.x+6,e.y+6,fill=Kolory(LiczbaMiast))
+            Plotno.create_text(e.x,e.y-10,text='M'+ f'{(LiczbaMiast):02d}')
             ListaMiast.insert(END,'M'+ f'{(LiczbaMiast):02d}' + ' [X:' + f'{(e.x):03d}'+',Y:'+f'{(e.y):03d}'+']')
+
             WyczyscMacierz()
-            Wiersz = []
-            if LiczbaMiast >=2 :
-                for i in range(LiczbaMiast):
-                    Wiersz.append(Odleglosc(i,i+1))
-                Macierz.insert("",END,values=Wiersz)
+            for i in range(LiczbaMiast + 1):
+                Wiersz = ['M'+ f'{(i):02d}']
+                MiastaShift = Miasta
+                for j in range(LiczbaMiast + 1):
+                    Wiersz.append(Odleglosc2(MiastaShift, i, j))
+                Macierz.insert("", END,iid=Kolumny[i], values=Wiersz)
+                Graf.append(Wiersz)
+
 
     def Wyczysc():
         Plotno.delete(ALL)
@@ -67,9 +77,17 @@ if __name__ == '__main__':
     def Koordynaty2(numer):
         return(int(Miasta[numer].x),int(Miasta[numer].y))
 
+    def Koordynaty3(Miasta,numer):
+        return(int(Miasta[numer].x),int(Miasta[numer].y))
+
     def Odleglosc(m1,m2):
         (x1,y1) = Koordynaty2(m1)
         (x2,y2) = Koordynaty2(m2)
+        return round(math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2)),1)
+
+    def Odleglosc2(ls,m1,m2):
+        (x1,y1) = Koordynaty3(ls,m1)
+        (x2,y2) = Koordynaty3(ls,m2)
         return round(math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2)),1)
 
     def Srodek(m1,m2):
@@ -77,18 +95,16 @@ if __name__ == '__main__':
         (x2,y2) = Koordynaty2(m2)
         return ((x2+x1)/2, (y2+y1)/2)
 
-    def Zachlanny():
-        Macierz.delete(*Macierz.get_children())
-    def Wspinaczkowy():
-        Kreski.append(1)
-    def Glab():
-        ps = ListaMiast.curselection()
-        if ps == ():
-            ps = (0,)
-        M1 = ps[0]
-        M2 = M1 + 1
+    def PolaczMiasta(M1,M2):
         Plotno.create_text(Srodek(M1,M2),text=f'{(Odleglosc(M1,M2)):0.1f}',)
         Plotno.create_line(Koordynaty2(M1),Koordynaty2(M2),fill='grey')
+
+    def Zachlanny():
+        pass
+    def Wspinaczkowy():
+        pass
+    def Glab():
+        pass
 
     root = Tk()
     root.title('Mapa')
@@ -100,11 +116,16 @@ if __name__ == '__main__':
     Wsp = Button(root, width=15, height=2, text='Algorytm \nWspinaczkowy', command=Wspinaczkowy)
     Gla = Button(root, width=15, height=2, text='Algorytm \nWgłąb', command=Glab)
 
-    Kolumny = ()
+    Kolumny = ('Odl.',)
     for i in range(15):
-        Kolumny = Kolumny + ("M" + str(i+1),)
-    Macierz = ttk.Treeview(root, columns=Kolumny,show='headings')
-    for i in range(15):
+        Kolumny = Kolumny + ("M" + str(i),)
+
+    Macierz = ttk.Treeview(root,columns=Kolumny,show='headings')
+
+    Macierz.heading('1', text="Odl.")
+    Macierz.column('1', minwidth=0, width=37, stretch=NO)
+
+    for i in range(16):
         Macierz.heading(Kolumny[i],text=Kolumny[i])
         Macierz.column(Kolumny[i], minwidth=0, width=37, stretch=NO)
     Plotno.grid(row=0, columnspan=3, column=0,pady=2)
@@ -113,7 +134,7 @@ if __name__ == '__main__':
     Zach.grid(row=1, column=0, pady=2)
     Wsp.grid(row=1, column=1, pady=2)
     Gla.grid(row=1, column=2, pady=2)
-    Macierz.grid(row=0,rowspan=2,column=4,sticky=NS)
+    Macierz.grid(row=0,column=4,pady=2,sticky=NS)
 
     Plotno.bind('<Button-1>', DodajMiasto)
     root.mainloop()
