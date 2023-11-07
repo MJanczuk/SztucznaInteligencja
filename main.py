@@ -3,6 +3,7 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 from tkinter import *
+from tkinter import ttk
 import random
 import math
 
@@ -18,7 +19,8 @@ def paint(e):
 if __name__ == '__main__':
     Miasta = []
     Kreski = []
-    #Macierz incydencji lub inna, zadanie jako roziwązanie grafu
+
+        #Macierz incydencji lub inna, zadanie jako roziwązanie grafu
     class miasto:
         def __init__(self,wsp_x,wsp_y):
             self.x = wsp_x
@@ -35,18 +37,28 @@ if __name__ == '__main__':
                         'indigo','cyan','crimson','beige','aquamarine3', 'deepskyblue3')
         return(ListaKolorow[numer])
 
+    def WyczyscMacierz():
+        Macierz.delete(*Macierz.get_children())
+
     def DodajMiasto(e):
         if len(Miasta)<15:Miasta.append(miasto(e.x,e.y))
 
         LiczbaMiast = ListaMiast.size()
         if LiczbaMiast<15:
             Plotno.create_oval(e.x-6,e.y-6,e.x+6,e.y+6,fill=Kolory(LiczbaMiast))
-            ListaMiast.insert(END,'Miasto '+ f'{(LiczbaMiast):02d}' + ' [X:' + f'{(e.x):03d}'+',Y:'+f'{(e.y):03d}'+']')
+            ListaMiast.insert(END,'M'+ f'{(LiczbaMiast):02d}' + ' [X:' + f'{(e.x):03d}'+',Y:'+f'{(e.y):03d}'+']')
+            WyczyscMacierz()
+            Wiersz = []
+            if LiczbaMiast >=2 :
+                for i in range(LiczbaMiast):
+                    Wiersz.append(Odleglosc(i,i+1))
+                Macierz.insert("",END,values=Wiersz)
 
     def Wyczysc():
         Plotno.delete(ALL)
         ListaMiast.delete(0,ListaMiast.size())
         Miasta.clear()
+        WyczyscMacierz()
 
     def Koordynaty(numer):
         Nazwa = ListaMiast.get(numer)
@@ -58,7 +70,7 @@ if __name__ == '__main__':
     def Odleglosc(m1,m2):
         (x1,y1) = Koordynaty2(m1)
         (x2,y2) = Koordynaty2(m2)
-        return math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
+        return round(math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2)),1)
 
     def Srodek(m1,m2):
         (x1,y1) = Koordynaty2(m1)
@@ -66,7 +78,7 @@ if __name__ == '__main__':
         return ((x2+x1)/2, (y2+y1)/2)
 
     def Zachlanny():
-        Kreski.clear()
+        Macierz.delete(*Macierz.get_children())
     def Wspinaczkowy():
         Kreski.append(1)
     def Glab():
@@ -88,12 +100,20 @@ if __name__ == '__main__':
     Wsp = Button(root, width=15, height=2, text='Algorytm \nWspinaczkowy', command=Wspinaczkowy)
     Gla = Button(root, width=15, height=2, text='Algorytm \nWgłąb', command=Glab)
 
+    Kolumny = ()
+    for i in range(15):
+        Kolumny = Kolumny + ("M" + str(i+1),)
+    Macierz = ttk.Treeview(root, columns=Kolumny,show='headings')
+    for i in range(15):
+        Macierz.heading(Kolumny[i],text=Kolumny[i])
+        Macierz.column(Kolumny[i], minwidth=0, width=37, stretch=NO)
     Plotno.grid(row=0, columnspan=3, column=0,pady=2)
     ListaMiast.grid(row=0,column=3,pady=2,sticky=NSEW)
     Kasowanie.grid(row=1,column=3,pady=2)
     Zach.grid(row=1, column=0, pady=2)
     Wsp.grid(row=1, column=1, pady=2)
     Gla.grid(row=1, column=2, pady=2)
+    Macierz.grid(row=0,rowspan=2,column=4,sticky=NS)
 
     Plotno.bind('<Button-1>', DodajMiasto)
     root.mainloop()
