@@ -179,6 +179,13 @@ if __name__ == '__main__':
         else:
             return False
 
+    def UsunZGrafuKolumne(graf, kolumna):
+        nowyGraf = []
+        for wiersz in graf:
+            del wiersz[kolumna]
+            nowyGraf.append(wiersz)
+        return nowyGraf
+
 
 
     def UsunStrzalki():
@@ -189,34 +196,92 @@ if __name__ == '__main__':
 
 ###### ALGORYTMY #####################################################
     def Zachlanny():
-        pass
+        def MinimumZachalnne(BADANA_LISTA_ODLEGŁOSCI, LISTA_DOSTEPNOSC):
+            MINIMUM_LOKALNE = max(BADANA_LISTA_ODLEGŁOSCI)
+            NAJBLIŻSZE_MIASTO = BADANA_LISTA_ODLEGŁOSCI.index(MINIMUM_LOKALNE)
+            for i in range(len(BADANA_LISTA_ODLEGŁOSCI)):
+                ODLEGŁOŚĆ = BADANA_LISTA_ODLEGŁOSCI[i]
+                if ODLEGŁOŚĆ < MINIMUM_LOKALNE and ODLEGŁOŚĆ != 0:
+                    PRETENDET = BADANA_LISTA_ODLEGŁOSCI.index(ODLEGŁOŚĆ)
+                    if PRETENDET in LISTA_DOSTEPNOSC:
+                        MINIMUM_LOKALNE = ODLEGŁOŚĆ
+                        NAJBLIŻSZE_MIASTO = PRETENDET
+
+            return (MINIMUM_LOKALNE, NAJBLIŻSZE_MIASTO)
+
+
+        LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI = Graf
+
+        MIASTO_STARTOWE = WybranyZListy()
+        FINALNA_KOLEJNOSC = []
+        FINALNA_KOLEJNOSC.append(MIASTO_STARTOWE)
+        FINALNA_ODLEGŁOSC = 0.0
+
+        LISTA_MIAST_DO_PRZEJRZENIA = []
+        for a in range(len(LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI)):
+            LISTA_MIAST_DO_PRZEJRZENIA.append(a)
+        LISTA_MIAST_DO_PRZEJRZENIA.remove(MIASTO_STARTOWE)
+
+        AKTUALNE_GDZIE_JESTESMY = MIASTO_STARTOWE
+        while LISTA_MIAST_DO_PRZEJRZENIA != []:
+            WYNIK_NAJMNIEJSZY = MinimumZachalnne(LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI[AKTUALNE_GDZIE_JESTESMY],
+                                                 LISTA_MIAST_DO_PRZEJRZENIA)
+            FINALNA_ODLEGŁOSC = WYNIK_NAJMNIEJSZY[0] + FINALNA_ODLEGŁOSC
+            FINALNA_KOLEJNOSC.append(WYNIK_NAJMNIEJSZY[1])
+            PolaczMiastaNr(AKTUALNE_GDZIE_JESTESMY,WYNIK_NAJMNIEJSZY[1])
+            AKTUALNE_GDZIE_JESTESMY = WYNIK_NAJMNIEJSZY[1]
+            LISTA_MIAST_DO_PRZEJRZENIA.remove(WYNIK_NAJMNIEJSZY[1])
+
+        print('Algorytm zachłanny: ',FINALNA_KOLEJNOSC,FINALNA_ODLEGŁOSC)
+
+
+
 
     def Wspinaczkowy():
-        pass
+        def DrogaWspinaczkowy(BADANA_LISTA_ODLEGLOSCI, KOLEJNOSC):
+            Suma = 0.0
+            for i in range(len(KOLEJNOSC) - 1):
+                Suma = Suma + BADANA_LISTA_ODLEGLOSCI[KOLEJNOSC[i]][KOLEJNOSC[i + 1]]
+            return (Suma)
+
+        def ZmianaMiejscWspiczkowy(LISTA_KOLEJNOSCI, PIERWSZY_ELEMENT, DRUGI_ELEMENT):
+            LISTA_KOLEJNOSCI[DRUGI_ELEMENT], LISTA_KOLEJNOSCI[PIERWSZY_ELEMENT] = LISTA_KOLEJNOSCI[PIERWSZY_ELEMENT], \
+                                                                                  LISTA_KOLEJNOSCI[DRUGI_ELEMENT]
+
+        LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI = Graf
+
+        OPTYMALNA_KOLEJNOSC = []
+        #import random
+        for a in range(len(LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI)):
+            OPTYMALNA_KOLEJNOSC.append(a)
+        # OPTYMALNA_KOLEJNOSC.reverse()
+        #random.shuffle(OPTYMALNA_KOLEJNOSC)
+
+        OPTYMALNA_DROGA = DrogaWspinaczkowy(LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI, OPTYMALNA_KOLEJNOSC)
+        print('Algorytm wspinaczkowy: ',OPTYMALNA_KOLEJNOSC,OPTYMALNA_DROGA)
+
+        DLUGOSC_KOLEJNOSCI = len(OPTYMALNA_KOLEJNOSC)
+        DLUGOSC_SWAPOWANIA = len(OPTYMALNA_KOLEJNOSC) - 1
+
+        i = 1
+        while i != DLUGOSC_SWAPOWANIA:
+            for j in range(1, DLUGOSC_KOLEJNOSCI - i):
+                TESTOWANA_KOLEJNOSC = list(OPTYMALNA_KOLEJNOSC)
+                ZmianaMiejscWspiczkowy(TESTOWANA_KOLEJNOSC, i, i + j)
+                TESTOWANA_DROGA = DrogaWspinaczkowy(LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI, TESTOWANA_KOLEJNOSC)
+                if TESTOWANA_DROGA < OPTYMALNA_DROGA:
+                    OPTYMALNA_KOLEJNOSC = list(TESTOWANA_KOLEJNOSC)
+                    OPTYMALNA_DROGA = TESTOWANA_DROGA
+                    print('Algorytm wspinaczkowy: ', OPTYMALNA_KOLEJNOSC, OPTYMALNA_DROGA)
+                    i = 0
+                    j = 1
+                    break
+            i = i + 1
+        for i in range(len(OPTYMALNA_KOLEJNOSC)-1):
+            PolaczMiastaNr(OPTYMALNA_KOLEJNOSC[i], OPTYMALNA_KOLEJNOSC[i+1])
 
     def Glab():
-        # Ustalona kolejność Cw2,Cw3,Cw4,Cw1
-        #       |
-        #  Cw4  |  Cw1
-        #       |
-        #----------------
-        #       |
-        #  Cw3  |  Cw2
-        #       |
-        Kolejnosc = []
-        Droga = 0
-        Punkty = list(Miasta)
-        AktPunkt = Punkty[WybranyZListy()]
-        Punkty.reverse()
-        Punkty.remove(AktPunkt)
-        while Punkty!=[]:
-            NxtPunkt = Punkty.pop()
-            Polaczenie = str(AktPunkt.nr) + '->' + str(NxtPunkt.nr) + ';'
-            Kolejnosc.append(Polaczenie)
-            PolaczMiastaKolejnosc(AktPunkt, NxtPunkt,Polaczenie)
-            Droga = Droga + OdlegloscMiast(AktPunkt, NxtPunkt)
-            AktPunkt = NxtPunkt
-        print('Algorytm w głąb; Droga='+str(Droga)+' Kolejność='+str(Kolejnosc))
+        print(Graf)
 #################################################################
 
     root = Tk()
@@ -229,6 +294,8 @@ if __name__ == '__main__':
     Zach = Button(root, width=15, height=2, text='Algorytm \nZachłanny', command=Zachlanny)
     Wsp = Button(root, width=15, height=2, text='Algorytm \nWspinaczkowy', command=Wspinaczkowy)
     Gla = Button(root, width=15, height=2, text='Algorytm \nWgłąb', command=Glab)
+    KonsolaText = StringVar(root,'-')
+    Konsola = Entry(root, xscrollcommand=True)
 
     Kolumny = ('Odl.',)
     for i in range(15):
@@ -244,12 +311,13 @@ if __name__ == '__main__':
         Macierz.column(Kolumny[i], minwidth=0, width=37, stretch=NO)
     Plotno.grid(row=0, columnspan=3, column=0,pady=2)
     ListaMiast.grid(row=0,column=3,pady=2,sticky=NSEW)
+    Macierz.grid(row=0,column=4,pady=2,sticky=NS)
     Kasowanie.grid(row=1,column=3,pady=2)
     UsStrz.grid(row=1,column=4,pady=2)
     Zach.grid(row=1, column=0, pady=2)
     Wsp.grid(row=1, column=1, pady=2)
     Gla.grid(row=1, column=2, pady=2)
-    Macierz.grid(row=0,column=4,pady=2,sticky=NS)
+    Konsola.grid(row=2,columnspan=5,sticky=EW,pady=3)
 
     Plotno.bind('<Button-1>', DodajMiasto)
     root.mainloop()
