@@ -92,6 +92,9 @@ if __name__ == '__main__':
     def Koordynaty2(numer):
         return(int(Miasta[numer].x),int(Miasta[numer].y))
 
+    def Koordynaty2off(numer,odstep):
+        return((int(Miasta[numer].x)+odstep),(int(Miasta[numer].y)+odstep))
+
     def KoordynatyListaNumer(Miasta, numer):
         return(int(Miasta[numer].x),int(Miasta[numer].y))
 
@@ -131,6 +134,10 @@ if __name__ == '__main__':
     def PolaczMiastaNr(M1, M2):
         Plotno.create_text(Srodek(M1,M2),text=f'{(Odleglosc(M1,M2)):0.1f}',)
         Plotno.create_line(Koordynaty2(M1),Koordynaty2(M2),fill='grey')
+
+    def PolaczMiastaNrKolorOffset(M1, M2, kolor, odstep):
+        Plotno.create_text(Srodek(M1,M2),text=f'{(Odleglosc(M1,M2)):0.1f}',)
+        Plotno.create_line(Koordynaty2off(M1,odstep),(Koordynaty2off(M2,odstep)),fill=kolor, width = 2 )
 
     def PolaczMiasta(M1, M2):
         Plotno.create_text(SrodekMiast(M1,M2), text=f'{(OdlegloscMiast(M1, M2)):0.1f}', )
@@ -228,11 +235,12 @@ if __name__ == '__main__':
                                                  LISTA_MIAST_DO_PRZEJRZENIA)
             FINALNA_ODLEGŁOSC = WYNIK_NAJMNIEJSZY[0] + FINALNA_ODLEGŁOSC
             FINALNA_KOLEJNOSC.append(WYNIK_NAJMNIEJSZY[1])
-            PolaczMiastaNr(AKTUALNE_GDZIE_JESTESMY,WYNIK_NAJMNIEJSZY[1])
+            PolaczMiastaNrKolorOffset(AKTUALNE_GDZIE_JESTESMY,WYNIK_NAJMNIEJSZY[1],'green',5)
             AKTUALNE_GDZIE_JESTESMY = WYNIK_NAJMNIEJSZY[1]
             LISTA_MIAST_DO_PRZEJRZENIA.remove(WYNIK_NAJMNIEJSZY[1])
 
-        print('Algorytm zachłanny: ',FINALNA_KOLEJNOSC,FINALNA_ODLEGŁOSC)
+        print('Algorytm zachłanny   : ',FINALNA_KOLEJNOSC,FINALNA_ODLEGŁOSC)
+        txZach.set('Algorytm zachłanny              KOLEJNOŚĆ = ' + str(FINALNA_KOLEJNOSC) + '      DROGA = ' + str(FINALNA_ODLEGŁOSC))
 
 
 
@@ -250,10 +258,13 @@ if __name__ == '__main__':
 
         LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI = Graf
 
+        MIASTO_STARTOWE = WybranyZListy()
         OPTYMALNA_KOLEJNOSC = []
         #import random
         for a in range(len(LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI)):
             OPTYMALNA_KOLEJNOSC.append(a)
+        OPTYMALNA_KOLEJNOSC.index(MIASTO_STARTOWE)
+        ZmianaMiejscWspiczkowy(OPTYMALNA_KOLEJNOSC, 0,OPTYMALNA_KOLEJNOSC.index(MIASTO_STARTOWE))
         # OPTYMALNA_KOLEJNOSC.reverse()
         #random.shuffle(OPTYMALNA_KOLEJNOSC)
 
@@ -278,10 +289,50 @@ if __name__ == '__main__':
                     break
             i = i + 1
         for i in range(len(OPTYMALNA_KOLEJNOSC)-1):
-            PolaczMiastaNr(OPTYMALNA_KOLEJNOSC[i], OPTYMALNA_KOLEJNOSC[i+1])
+            PolaczMiastaNrKolorOffset(OPTYMALNA_KOLEJNOSC[i], OPTYMALNA_KOLEJNOSC[i+1],'blue',0)
+        txWsp.set('Algorytm wspinaczkowy      KOLEJNOŚĆ = ' + str(OPTYMALNA_KOLEJNOSC) + '      DROGA = ' + str(OPTYMALNA_DROGA))
 
     def Glab():
-        print(Graf)
+        import itertools
+
+        def DrogaWglab(BADANA_LISTA_ODLEGLOSCI, KOLEJNOSC):
+            Suma = 0.0
+            for i in range(len(KOLEJNOSC) - 1):
+                Suma = Suma + BADANA_LISTA_ODLEGLOSCI[KOLEJNOSC[i]][KOLEJNOSC[i + 1]]
+            return (Suma)
+
+        LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI = Graf
+        MIASTO_STARTOWE = WybranyZListy()
+        AKTUALNA_KOLEJNOSC = []
+        for a in range(len(LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI)):
+            AKTUALNA_KOLEJNOSC.append(a)
+        AKTUALNA_KOLEJNOSC.remove(MIASTO_STARTOWE)
+
+        TESTOWANA_KOLEJNOSC = []
+        TESTOWANA_KOLEJNOSC.append(MIASTO_STARTOWE)
+        for a in AKTUALNA_KOLEJNOSC:
+            TESTOWANA_KOLEJNOSC.append(a)
+
+        print(TESTOWANA_KOLEJNOSC)
+        AKTUALNA_DROGA = DrogaWglab(LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI, TESTOWANA_KOLEJNOSC)
+        print('Algorytm wgłąb       : ', AKTUALNA_KOLEJNOSC, AKTUALNA_DROGA)
+
+        A = itertools.permutations(AKTUALNA_KOLEJNOSC)
+        for a in A:
+            TESTOWANA_KOLEJNOSC = []
+            TESTOWANA_KOLEJNOSC.append(MIASTO_STARTOWE)
+            for b in a:
+                TESTOWANA_KOLEJNOSC.append(b)
+            TestowanaDroga = DrogaWglab(LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI, TESTOWANA_KOLEJNOSC)
+
+            if TestowanaDroga < AKTUALNA_DROGA:
+                AKTUALNA_KOLEJNOSC = TESTOWANA_KOLEJNOSC
+                AKTUALNA_DROGA = TestowanaDroga
+                print('Algorytm wgłąb       : '+ str(AKTUALNA_KOLEJNOSC) +  str(AKTUALNA_DROGA))
+
+        for i in range(len(TESTOWANA_KOLEJNOSC)-1):
+            PolaczMiastaNrKolorOffset(TESTOWANA_KOLEJNOSC[i], TESTOWANA_KOLEJNOSC[i+1],'red',-5)
+        txGlab.set('Algorytm wgłąb                     KOLEJNOŚĆ = '+ str(TESTOWANA_KOLEJNOSC) + '      DROGA = ' + str(AKTUALNA_DROGA))
 #################################################################
 
     root = Tk()
@@ -291,11 +342,15 @@ if __name__ == '__main__':
     ListaMiast = Listbox(root, selectmode=SINGLE)
     Kasowanie = Button(root, width=15, height=2, text='Usuń \nmiasta',command=Wyczysc)
     UsStrz = Button(root, width=15, height=2, text='Usuń \nstrzałki',command=UsunStrzalki)
-    Zach = Button(root, width=15, height=2, text='Algorytm \nZachłanny', command=Zachlanny)
-    Wsp = Button(root, width=15, height=2, text='Algorytm \nWspinaczkowy', command=Wspinaczkowy)
-    Gla = Button(root, width=15, height=2, text='Algorytm \nWgłąb', command=Glab)
-    KonsolaText = StringVar(root,'-')
-    Konsola = Entry(root, xscrollcommand=True)
+    Zach = Button(root, width=15, height=2, text='Algorytm \nZachłanny',bg='green', fg='white', command=Zachlanny)
+    Wsp = Button(root, width=15, height=2, text='Algorytm \nWspinaczkowy',bg='blue', fg='white', command=Wspinaczkowy)
+    Gla = Button(root, width=15, height=2, text='Algorytm \nWgłąb',bg='red', fg='white', command=Glab)
+    txZach = StringVar()
+    KonsolaZach = Entry(root,textvariable=txZach, xscrollcommand=True)
+    txWsp = StringVar()
+    KonsolaWsp = Entry(root, textvariable=txWsp, xscrollcommand=True)
+    txGlab = StringVar()
+    KonsolaGlab = Entry(root, textvariable=txGlab, xscrollcommand=True)
 
     Kolumny = ('Odl.',)
     for i in range(15):
@@ -317,7 +372,9 @@ if __name__ == '__main__':
     Zach.grid(row=1, column=0, pady=2)
     Wsp.grid(row=1, column=1, pady=2)
     Gla.grid(row=1, column=2, pady=2)
-    Konsola.grid(row=2,columnspan=5,sticky=EW,pady=3)
+    KonsolaZach.grid(row=2,columnspan=5,sticky=EW,pady=3)
+    KonsolaWsp.grid(row=3,columnspan=5,sticky=EW,pady=3)
+    KonsolaGlab.grid(row=4,columnspan=5,sticky=EW,pady=3)
 
     Plotno.bind('<Button-1>', DodajMiasto)
     root.mainloop()
