@@ -1,24 +1,25 @@
-import itertools
+input_elements = ['A','B','C']
 
-def DrogaWglab(BADANA_LISTA_ODLEGLOSCI, KOLEJNOSC):
-    Suma = 0.0
-    for i in range(len(KOLEJNOSC) - 1):
-        Suma = Suma + BADANA_LISTA_ODLEGLOSCI[KOLEJNOSC[i]][KOLEJNOSC[i + 1]]
-    return (Suma)
+def Lista_Mozliwosci(NumerMiasta):
+    n = len(NumerMiasta)
+    c = [0] * n
+    Wynik = [NumerMiasta[:]]
+    i = 0
+    while i < n:
+        if c[i] < i:
+            if i % 2 == 0:
+                NumerMiasta[0], NumerMiasta[i] = NumerMiasta[i], NumerMiasta[0]
+            else:
+                NumerMiasta[c[i]], NumerMiasta[i] = NumerMiasta[i], NumerMiasta[c[i]]
 
-LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI = [[0.0, 136.0, 143.6, 91.2], [136.0, 0.0, 145.3, 87.8], [143.6, 145.3, 0.0, 69.4], [91.2, 87.8, 69.4, 0.0]]
+            Wynik.append(NumerMiasta[:])
+            c[i] += 1
+            i = 0
+        else:
+            c[i] = 0
+            i += 1
+    return Wynik
 
-AKTUALNA_KOLEJNOSC = []
-for a in range(len(LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI)):
-    AKTUALNA_KOLEJNOSC.append(a)
-
-AKTUALNA_DROGA = DrogaWglab(LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI, AKTUALNA_KOLEJNOSC)
-print('Algorytm wgłąb       : ', AKTUALNA_KOLEJNOSC, AKTUALNA_DROGA)
-
-A = itertools.permutations(AKTUALNA_KOLEJNOSC)
-for a in A:
-    TestowanaDroga = DrogaWglab(LISTA_ODLEGLOSCI_MIEDZY_MIASTAMI, a)
-    if TestowanaDroga<AKTUALNA_DROGA:
-        AKTUALNA_KOLEJNOSC = a
-        AKTUALNA_DROGA = TestowanaDroga
-        print('Algorytm wgłąb       : ', AKTUALNA_KOLEJNOSC, AKTUALNA_DROGA)
+# Example usage:
+result = Lista_Mozliwosci(input_elements)
+print(result)
